@@ -122,7 +122,7 @@ export type ConsideredPass = {
   minutesOfDay: number;
   distanceKm: number;
   conflict: boolean;
-  altitude_km?: number;
+  altitude_km?: number | undefined;
 };
 
 export type Window = { startMin: number; endMin: number; blocked: boolean; causes: string[] };
@@ -150,7 +150,7 @@ export function planLaunch(passes: SatellitePass[], input: PlanInput): PlanResul
     .map((p) => {
       const d = haversineKm(input.latitude, input.longitude, p.latitude, p.longitude);
       const t = p.pass_datetime.slice(11, 16);
-      const [hh, mm] = t.split(":").map(Number);
+      const [hh = 0, mm = 0] = t.split(":").map(Number);
       return {
         satellite_name: p.satellite_name,
         time: t,

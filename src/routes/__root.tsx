@@ -8,9 +8,12 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
+import { Satellite } from "lucide-react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 function NotFoundComponent() {
   return (
@@ -77,19 +80,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "OrbitClear — Satellite Launch Window Advisor" },
+      {
+        name: "description",
+        content:
+          "Rule-based launch window advisor that checks satellite traffic near a launch site before recommending a safe launch time.",
+      },
+      { name: "author", content: "Dharan — Grade 12" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
+      { rel: "stylesheet", href: appCss },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: appCss,
+        href: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Tamil:wght@400;500;600&display=swap",
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
@@ -114,13 +121,66 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
+const navItems = [
+  { to: "/", label: "Launch Planner" },
+  { to: "/traffic", label: "Traffic Data" },
+  { to: "/how-it-works", label: "How it Works" },
+] as const;
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <TooltipProvider delayDuration={150}>
+        <div className="starfield min-h-screen font-sans text-foreground">
+          <div className="orbit-grid min-h-screen">
+            <header className="sticky top-0 z-30 border-b border-border/70 bg-background/80 backdrop-blur">
+              <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <Link to="/" className="flex items-center gap-2.5">
+                  <span className="flex size-9 items-center justify-center rounded-md border border-primary/40 bg-primary/10">
+                    <Satellite className="size-4 text-primary" />
+                  </span>
+                  <span className="leading-tight">
+                    <span className="glow-text block font-display text-base font-semibold tracking-wide">
+                      OrbitClear
+                    </span>
+                    <span className="block text-[11px] text-muted-foreground">
+                      Satellite Launch Window Advisor
+                    </span>
+                  </span>
+                </Link>
+                <nav className="flex gap-1 overflow-x-auto">
+                  {navItems.map((item) => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className="rounded-md px-3 py-2 text-sm whitespace-nowrap text-muted-foreground transition-colors hover:bg-accent/60 hover:text-foreground"
+                      activeOptions={{ exact: item.to === "/" }}
+                      activeProps={{
+                        className:
+                          "rounded-md px-3 py-2 text-sm whitespace-nowrap bg-primary/15 text-primary border border-primary/30",
+                      }}
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+            </header>
+
+            {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+            <main className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+              <Outlet />
+            </main>
+
+            <footer className="border-t border-border/70 py-6 text-center text-xs text-muted-foreground">
+              OrbitClear — Satellite Launch Window Advisor · POC by Dharan
+            </footer>
+          </div>
+        </div>
+        <Toaster />
+      </TooltipProvider>
     </QueryClientProvider>
   );
 }

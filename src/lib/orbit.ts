@@ -31,6 +31,13 @@ const SATELLITES: { name: string; alt: number }[] = [
   { name: "ASTROSAT", alt: 650 },
 ];
 
+/** Busy ground-track hubs near well-known launch sites, so the demo shows conflicts. */
+const HUBS = [
+  { lat: 13.72, lon: 80.23 },
+  { lat: 28.57, lon: -80.65 },
+  { lat: 45.96, lon: 63.31 },
+];
+
 function mulberry32(seed: number) {
   return function () {
     seed |= 0;
@@ -60,10 +67,15 @@ export function generateSeedData(startDate = new Date()): SatellitePass[] {
         lon += nodeDrift + (rand() - 0.5) * 30;
         while (lon > 180) lon -= 360;
         while (lon < -180) lon += 360;
-        const lat = Math.max(
+        let lat = Math.max(
           -85,
           Math.min(85, Math.sin((si + p + day) * 1.7) * inclinationSpread + (rand() - 0.5) * 18),
         );
+        if (rand() < 0.22) {
+          const hub = HUBS[Math.floor(rand() * HUBS.length)]!;
+          lat = hub.lat + (rand() - 0.5) * 8;
+          lon = hub.lon + (rand() - 0.5) * 8;
+        }
         rows.push({
           id: `seed-${si}-${day}-${p}`,
           satellite_name: sat.name,
@@ -77,7 +89,11 @@ export function generateSeedData(startDate = new Date()): SatellitePass[] {
     }
   });
 
-  return rows.sort((a, b) => a.pass_datetime.localeCompare(b.pass_datetime)).slice(0, 140);
+  const step = Math.max(1, Math.floor(rows.length / 140));
+  return rows
+    .filter((_, i) => i % step === 0)
+    .slice(0, 140)
+    .sort((a, b) => a.pass_datetime.localeCompare(b.pass_datetime));
 }
 
 export function round(n: number, d = 2) {

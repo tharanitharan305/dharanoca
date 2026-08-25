@@ -229,7 +229,7 @@ export default function Globe({
         size[i] = s.status === "inactive" ? 0.5 : 1;
       });
       geo.setDrawRange(0, count);
-      geo.attributes.color!.needsUpdate = true;
+      geo.attributes["color"]!.needsUpdate = true;
     }
 
     // ---- launch site ------------------------------------------------------
@@ -420,8 +420,8 @@ export default function Globe({
       camera.lookAt(0, 0, 0);
 
       // smooth position interpolation toward the target time
-      const attr = geo.attributes.position as THREE.BufferAttribute;
-      for (let i = 0; i < count * 3; i++) pos[i] += (targetPos[i]! - pos[i]!) * 0.18;
+      const attr = geo.attributes["position"] as THREE.BufferAttribute;
+      for (let i = 0; i < count * 3; i++) pos[i] = pos[i]! + (targetPos[i]! - pos[i]!) * 0.18;
       attr.needsUpdate = true;
 
       // pulse conflicts

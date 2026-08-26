@@ -48,33 +48,35 @@ function mulberry32(seed: number) {
   };
 }
 
-/** Deterministic-ish simulated ground-track passes for the next 14 days. */
+/** Deterministic-ish simulated ground-track passes for the next few days. */
 export function generateSeedData(startDate = new Date()): SatellitePass[] {
   const rand = mulberry32(20260823);
   const rows: SatellitePass[] = [];
   const base = new Date(startDate);
   base.setHours(0, 0, 0, 0);
+  const DAYS = 4;
 
   SATELLITES.forEach((sat, si) => {
     const inclinationSpread = 20 + rand() * 60;
-    const nodeDrift = -15 - rand() * 20; // deg per pass (ground track drift)
+    const nodeDrift = -55 - rand() * 40; // deg per pass (ground track drift)
     let lon = -180 + rand() * 360;
-    for (let day = 0; day < 14; day++) {
-      const passes = 4 + Math.floor(rand() * 4);
+    for (let day = 0; day < DAYS; day++) {
+      const passes = rand() < 0.5 ? 2 : 3;
+      const slot = Math.floor(1440 / passes);
       for (let p = 0; p < passes; p++) {
-        const minutesOfDay = Math.floor(rand() * 1440);
+        const minutesOfDay = Math.min(1439, p * slot + Math.floor(rand() * slot));
         const dt = new Date(base.getTime() + day * 86400000 + minutesOfDay * 60000);
         lon += nodeDrift + (rand() - 0.5) * 30;
         while (lon > 180) lon -= 360;
         while (lon < -180) lon += 360;
         let lat = Math.max(
-          -85,
-          Math.min(85, Math.sin((si + p + day) * 1.7) * inclinationSpread + (rand() - 0.5) * 18),
+          -80,
+          Math.min(80, Math.sin((si + p + day) * 1.7) * inclinationSpread + (rand() - 0.5) * 18),
         );
-        if (rand() < 0.22) {
+        if (rand() < 0.18) {
           const hub = HUBS[Math.floor(rand() * HUBS.length)]!;
-          lat = hub.lat + (rand() - 0.5) * 8;
-          lon = hub.lon + (rand() - 0.5) * 8;
+          lat = hub.lat + (rand() - 0.5) * 6;
+          lon = hub.lon + (rand() - 0.5) * 6;
         }
         rows.push({
           id: `seed-${si}-${day}-${p}`,
@@ -89,11 +91,7 @@ export function generateSeedData(startDate = new Date()): SatellitePass[] {
     }
   });
 
-  const step = Math.max(1, Math.floor(rows.length / 140));
-  return rows
-    .filter((_, i) => i % step === 0)
-    .slice(0, 140)
-    .sort((a, b) => a.pass_datetime.localeCompare(b.pass_datetime));
+  return rows.sort((a, b) => a.pass_datetime.localeCompare(b.pass_datetime)).slice(0, 150);
 }
 
 export function round(n: number, d = 2) {

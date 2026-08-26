@@ -39,7 +39,7 @@ function makeEarthTexture() {
   ctx.strokeStyle = "rgba(56,189,248,0.07)";
   ctx.lineWidth = 1;
   for (let lon = -180; lon <= 180; lon += 15) {
-    const x = ((lon + 180) / 360) * w;
+    const x = ((180 - lon) / 360) * w;
     ctx.beginPath();
     ctx.moveTo(x, 0);
     ctx.lineTo(x, h);
@@ -53,7 +53,7 @@ function makeEarthTexture() {
     ctx.stroke();
   }
 
-  ctx.fillStyle = "#183b5c";
+  ctx.fillStyle = "#1d4e73";
   ctx.strokeStyle = "rgba(125,211,252,0.75)";
   ctx.lineWidth = 1.4;
   for (const poly of LAND) {
@@ -61,7 +61,7 @@ function makeEarthTexture() {
     if (!ring) continue;
     ctx.beginPath();
     ring.forEach(([lon, lat], i) => {
-      const x = ((lon! + 180) / 360) * w;
+      const x = ((180 - lon!) / 360) * w;
       const y = ((90 - lat!) / 180) * h;
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);

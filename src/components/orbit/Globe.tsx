@@ -29,9 +29,9 @@ function makeEarthTexture() {
   c.height = h;
   const ctx = c.getContext("2d")!;
   const ocean = ctx.createLinearGradient(0, 0, 0, h);
-  ocean.addColorStop(0, "#071426");
-  ocean.addColorStop(0.5, "#0a2138");
-  ocean.addColorStop(1, "#071426");
+  ocean.addColorStop(0, "#03080f");
+  ocean.addColorStop(0.5, "#071a2c");
+  ocean.addColorStop(1, "#03080f");
   ctx.fillStyle = ocean;
   ctx.fillRect(0, 0, w, h);
 
@@ -53,7 +53,7 @@ function makeEarthTexture() {
     ctx.stroke();
   }
 
-  ctx.fillStyle = "#1d4e73";
+  ctx.fillStyle = "#2b6a97";
   ctx.strokeStyle = "rgba(125,211,252,0.75)";
   ctx.lineWidth = 1.4;
   for (const poly of LAND) {
@@ -135,6 +135,7 @@ export default function Globe({
     syncSats: () => void;
     syncSite: () => void;
     startLaunch: () => void;
+    focus: (lat: number, lon: number) => void;
   } | null>(null);
 
   useEffect(() => {
@@ -315,13 +316,21 @@ export default function Globe({
       launchT = 0;
     }
 
-    apiRef.current = { syncSats, syncSite, startLaunch };
+    apiRef.current = { syncSats, syncSite, startLaunch, focus };
     syncSats();
     syncSite();
 
     // ---- interaction ------------------------------------------------------
-    let rotY = -((siteRef.current?.longitude ?? 80) * Math.PI) / 180 - Math.PI / 2;
+    let rotY = (((siteRef.current?.longitude ?? 80) - 90) * Math.PI) / 180;
     let rotX = ((siteRef.current?.latitude ?? 15) * Math.PI) / 180;
+    let targetRotY: number | null = null;
+    let targetRotX: number | null = null;
+    function focus(lat: number, lon: number) {
+      targetRotY = ((lon - 90) * Math.PI) / 180;
+      targetRotX = Math.max(-1.2, Math.min(1.2, (lat * Math.PI) / 180));
+      while (targetRotY - rotY > Math.PI) targetRotY -= Math.PI * 2;
+      while (targetRotY - rotY < -Math.PI) targetRotY += Math.PI * 2;
+    }
     let dragging = false;
     let moved = 0;
     let lastX = 0;
@@ -350,6 +359,8 @@ export default function Globe({
       lastX = e.clientX;
       lastY = e.clientY;
       moved += Math.abs(dx) + Math.abs(dy);
+      targetRotY = null;
+      targetRotX = null;
       rotY += dx * 0.005;
       rotX = Math.max(-1.4, Math.min(1.4, rotX + dy * 0.005));
       velY = dx * 0.0004;
@@ -408,7 +419,15 @@ export default function Globe({
       const dt = Math.min(clock.getDelta(), 0.05);
       frame++;
 
-      if (!dragging) {
+      if (targetRotY != null && targetRotX != null) {
+        rotY += (targetRotY - rotY) * 0.08;
+        rotX += (targetRotX - rotX) * 0.08;
+        if (Math.abs(targetRotY - rotY) < 0.002) {
+          targetRotY = null;
+          targetRotX = null;
+        }
+        velY = 0;
+      } else if (!dragging) {
         rotY += velY;
         velY *= 0.96;
         if (Math.abs(velY) < 0.0006) velY = 0.0006;

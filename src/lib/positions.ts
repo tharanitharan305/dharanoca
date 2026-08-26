@@ -61,8 +61,8 @@ function slerp(a: [number, number, number], b: [number, number, number], f: numb
   ];
 }
 
-const MAX_GAP = 240; // minutes: beyond this the satellite is considered out of view
-const SOLO_WINDOW = 60;
+const MAX_GAP = 1440; // interpolate across the whole day between recorded passes
+const SOLO_WINDOW = 240;
 
 /** Position of a satellite at minute-of-day `min`, or null when not in the tracked window. */
 export function positionAt(track: Track, min: number): { lat: number; lon: number } | null {

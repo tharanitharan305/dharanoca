@@ -6,6 +6,8 @@ import type { SatState } from "@/lib/positions";
 const LAND = landData as number[][][][];
 
 export type GlobeProps = {
+  /** bump to re-centre the globe on the current site */
+  focusKey?: number;
   satellites: SatState[];
   site: { latitude: number; longitude: number; name?: string } | null;
   radiusKm: number;
@@ -107,6 +109,7 @@ function altRadius(altKm: number) {
 }
 
 export default function Globe({
+  focusKey = 0,
   satellites,
   site,
   radiusKm,
@@ -521,6 +524,11 @@ export default function Globe({
   useEffect(() => {
     if (launching) apiRef.current?.startLaunch();
   }, [launching]);
+
+  useEffect(() => {
+    if (focusKey && site) apiRef.current?.focus(site.latitude, site.longitude);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusKey]);
 
   return (
     <div className="relative h-[clamp(320px,52vh,560px)] w-full overflow-hidden rounded-lg border border-border bg-[#04070f]">

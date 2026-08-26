@@ -62,6 +62,7 @@ function LaunchPlanner() {
   const [result, setResult] = useState<PlanResult | null>(null);
   const [launchMin, setLaunchMin] = useState<number | null>(null);
   const [launching, setLaunching] = useState(false);
+  const [focusKey, setFocusKey] = useState(0);
   const [error, setError] = useState<string | null>(null);
 
   const tracks = useMemo(() => buildTracks(traffic, date), [traffic, date]);
@@ -130,6 +131,7 @@ function LaunchPlanner() {
       });
       setResult(r);
       setScanning(false);
+      setFocusKey((k) => k + 1);
       if (r.recommended) {
         setLaunchMin(r.recommended.startMin);
         tweenTo(r.recommended.startMin);
@@ -177,6 +179,7 @@ function LaunchPlanner() {
               }
             >
               <Globe
+                focusKey={focusKey}
                 satellites={sats}
                 site={site}
                 radiusKm={radiusKm}
@@ -213,6 +216,7 @@ function LaunchPlanner() {
                   onClick={() => {
                     setSiteName(p.label);
                     setSite({ latitude: p.lat, longitude: p.lon });
+                    setFocusKey((k) => k + 1);
                   }}
                   className="rounded-full border border-border px-3 py-1 text-xs text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary"
                 >

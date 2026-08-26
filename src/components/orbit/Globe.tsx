@@ -41,7 +41,7 @@ function makeEarthTexture() {
   ctx.strokeStyle = "rgba(56,189,248,0.07)";
   ctx.lineWidth = 1;
   for (let lon = -180; lon <= 180; lon += 15) {
-    const x = ((180 - lon) / 360) * w;
+    const x = ((lon + 180) / 360) * w;
     ctx.beginPath();
     ctx.moveTo(x, 0);
     ctx.lineTo(x, h);
@@ -63,7 +63,7 @@ function makeEarthTexture() {
     if (!ring) continue;
     ctx.beginPath();
     ring.forEach(([lon, lat], i) => {
-      const x = ((180 - lon!) / 360) * w;
+      const x = ((lon! + 180) / 360) * w;
       const y = ((90 - lat!) / 180) * h;
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
@@ -92,6 +92,15 @@ function dotSprite() {
   ctx.arc(s / 2, s / 2, s / 2, 0, Math.PI * 2);
   ctx.fill();
   return new THREE.CanvasTexture(c);
+}
+
+/** Sphere whose UVs run west-to-east so a standard equirectangular map is not mirrored. */
+function mirroredSphere(r: number, wSeg: number, hSeg: number) {
+  const geo = new THREE.SphereGeometry(r, wSeg, hSeg);
+  const uv = geo.getAttribute("uv") as THREE.BufferAttribute;
+  for (let i = 0; i < uv.count; i++) uv.setX(i, 1 - uv.getX(i));
+  uv.needsUpdate = true;
+  return geo;
 }
 
 function vecFor(lat: number, lon: number, r: number) {
@@ -160,7 +169,7 @@ export default function Globe({
     scene.add(root);
 
     const earth = new THREE.Mesh(
-      new THREE.SphereGeometry(1, 96, 96),
+      mirroredSphere(1, 96, 96),
       new THREE.MeshPhongMaterial({ map: makeEarthTexture(), shininess: 8, specular: 0x14364f }),
     );
     root.add(earth);

@@ -41,7 +41,7 @@ function makeEarthTexture() {
   ctx.strokeStyle = "rgba(56,189,248,0.07)";
   ctx.lineWidth = 1;
   for (let lon = -180; lon <= 180; lon += 15) {
-    const x = ((lon + 180) / 360) * w;
+    const x = ((180 - lon) / 360) * w;
     ctx.beginPath();
     ctx.moveTo(x, 0);
     ctx.lineTo(x, h);
@@ -63,7 +63,7 @@ function makeEarthTexture() {
     if (!ring) continue;
     ctx.beginPath();
     ring.forEach(([lon, lat], i) => {
-      const x = ((lon! + 180) / 360) * w;
+      const x = ((180 - lon!) / 360) * w;
       const y = ((90 - lat!) / 180) * h;
       if (i === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
@@ -95,8 +95,6 @@ function dotSprite() {
 }
 
 function vecFor(lat: number, lon: number, r: number) {
-  // texture u maps to -longitude in three's sphere geometry, so mirror here
-  lon = -lon;
   const la = (lat * Math.PI) / 180;
   const lo = (lon * Math.PI) / 180;
   return new THREE.Vector3(
@@ -333,12 +331,12 @@ export default function Globe({
     syncSite();
 
     // ---- interaction ------------------------------------------------------
-    let rotY = ((-(siteRef.current?.longitude ?? 80) - 90) * Math.PI) / 180;
+    let rotY = (((siteRef.current?.longitude ?? 80) - 90) * Math.PI) / 180;
     let rotX = ((siteRef.current?.latitude ?? 15) * Math.PI) / 180;
     let targetRotY: number | null = null;
     let targetRotX: number | null = null;
     function focus(lat: number, lon: number) {
-      targetRotY = ((-lon - 90) * Math.PI) / 180;
+      targetRotY = ((lon - 90) * Math.PI) / 180;
       targetRotX = Math.max(-1.2, Math.min(1.2, (lat * Math.PI) / 180));
       while (targetRotY - rotY > Math.PI) targetRotY -= Math.PI * 2;
       while (targetRotY - rotY < -Math.PI) targetRotY += Math.PI * 2;
@@ -390,7 +388,7 @@ export default function Globe({
       if (!hit) return;
       const local = root.worldToLocal(hit.point.clone()).normalize();
       const lat = (Math.asin(local.y) * 180) / Math.PI;
-      const lon = (-Math.atan2(local.z, local.x) * 180) / Math.PI;
+      const lon = (Math.atan2(local.z, local.x) * 180) / Math.PI;
       pickRef.current(Math.round(lat * 100) / 100, Math.round(lon * 100) / 100);
     }
     function onWheel(e: WheelEvent) {

@@ -38,7 +38,7 @@ export function TimelineScrubber({
         </Button>
       </div>
 
-      <div className="relative">
+      <div className="relative pt-6">
         <div className="relative h-9 w-full overflow-hidden rounded-md border border-border bg-muted/30 shadow-inner">
           {windows.map((w, i) => (
             <div
@@ -67,7 +67,7 @@ export function TimelineScrubber({
 
         {launchMin != null && (
           <div
-            className="absolute -top-6 flex -translate-x-1/2 items-center gap-1 rounded-full border border-blocked/50 bg-background/90 px-2 py-0.5 text-[10px] tracking-wide whitespace-nowrap text-blocked uppercase"
+            className="absolute top-0 flex -translate-x-1/2 items-center gap-1 rounded-full border border-blocked/50 bg-background/90 px-2 py-0.5 text-[10px] tracking-wide whitespace-nowrap text-blocked uppercase"
             style={{ left: `${Math.min(92, Math.max(8, pct(launchMin)))}%` }}
           >
             <Rocket className="size-3" /> Recommended launch time

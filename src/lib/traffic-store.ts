@@ -1,7 +1,7 @@
 import { useSyncExternalStore } from "react";
 import { generateSeedData, type SatellitePass } from "./orbit";
 
-const KEY = "orbitclear.traffic.v1";
+const KEY = "orbitclear.traffic.v2";
 
 let data: SatellitePass[] = [];
 let seeded = false;

@@ -6,6 +6,8 @@ import type { SatState } from "@/lib/positions";
 const LAND = landData as number[][][][];
 
 export type GlobeProps = {
+  /** bump to re-centre the globe on the current site */
+  focusKey?: number;
   satellites: SatState[];
   site: { latitude: number; longitude: number; name?: string } | null;
   radiusKm: number;
@@ -29,9 +31,9 @@ function makeEarthTexture() {
   c.height = h;
   const ctx = c.getContext("2d")!;
   const ocean = ctx.createLinearGradient(0, 0, 0, h);
-  ocean.addColorStop(0, "#071426");
-  ocean.addColorStop(0.5, "#0a2138");
-  ocean.addColorStop(1, "#071426");
+  ocean.addColorStop(0, "#03080f");
+  ocean.addColorStop(0.5, "#071a2c");
+  ocean.addColorStop(1, "#03080f");
   ctx.fillStyle = ocean;
   ctx.fillRect(0, 0, w, h);
 
@@ -53,7 +55,7 @@ function makeEarthTexture() {
     ctx.stroke();
   }
 
-  ctx.fillStyle = "#183b5c";
+  ctx.fillStyle = "#2b6a97";
   ctx.strokeStyle = "rgba(125,211,252,0.75)";
   ctx.lineWidth = 1.4;
   for (const poly of LAND) {
@@ -92,9 +94,19 @@ function dotSprite() {
   return new THREE.CanvasTexture(c);
 }
 
+/** Sphere whose UVs run west-to-east so a standard equirectangular map is not mirrored. */
+function mirroredSphere(r: number, wSeg: number, hSeg: number) {
+  const geo = new THREE.SphereGeometry(r, wSeg, hSeg);
+  const uv = geo.getAttribute("uv") as THREE.BufferAttribute;
+  for (let i = 0; i < uv.count; i++) uv.setX(i, 1 - uv.getX(i));
+  uv.needsUpdate = true;
+  return geo;
+}
+
 function vecFor(lat: number, lon: number, r: number) {
   const la = (lat * Math.PI) / 180;
-  const lo = (lon * Math.PI) / 180;
+  // three's SphereGeometry maps texture u to -longitude, so mirror here
+  const lo = (-lon * Math.PI) / 180;
   return new THREE.Vector3(
     r * Math.cos(la) * Math.cos(lo),
     r * Math.sin(la),
@@ -107,6 +119,7 @@ function altRadius(altKm: number) {
 }
 
 export default function Globe({
+  focusKey = 0,
   satellites,
   site,
   radiusKm,
@@ -135,6 +148,7 @@ export default function Globe({
     syncSats: () => void;
     syncSite: () => void;
     startLaunch: () => void;
+    focus: (lat: number, lon: number) => void;
   } | null>(null);
 
   useEffect(() => {
@@ -155,7 +169,7 @@ export default function Globe({
     scene.add(root);
 
     const earth = new THREE.Mesh(
-      new THREE.SphereGeometry(1, 96, 96),
+      mirroredSphere(1, 96, 96),
       new THREE.MeshPhongMaterial({ map: makeEarthTexture(), shininess: 8, specular: 0x14364f }),
     );
     root.add(earth);
@@ -315,13 +329,28 @@ export default function Globe({
       launchT = 0;
     }
 
-    apiRef.current = { syncSats, syncSite, startLaunch };
+    apiRef.current = { syncSats, syncSite, startLaunch, focus };
+    (window as unknown as Record<string, unknown>)["__orbitDebug"] = () => ({
+      siteVisible: siteGroup.visible,
+      beacon: beacon.position.toArray(),
+      ringPts: dangerRing.geometry.getAttribute("position")?.count ?? 0,
+      rot: [root.rotation.x, root.rotation.y],
+      count,
+    });
     syncSats();
     syncSite();
 
     // ---- interaction ------------------------------------------------------
-    let rotY = -((siteRef.current?.longitude ?? 80) * Math.PI) / 180 - Math.PI / 2;
+    let rotY = ((-(siteRef.current?.longitude ?? 80) - 90) * Math.PI) / 180;
     let rotX = ((siteRef.current?.latitude ?? 15) * Math.PI) / 180;
+    let targetRotY: number | null = null;
+    let targetRotX: number | null = null;
+    function focus(lat: number, lon: number) {
+      targetRotY = ((-lon - 90) * Math.PI) / 180;
+      targetRotX = Math.max(-1.2, Math.min(1.2, (lat * Math.PI) / 180));
+      while (targetRotY - rotY > Math.PI) targetRotY -= Math.PI * 2;
+      while (targetRotY - rotY < -Math.PI) targetRotY += Math.PI * 2;
+    }
     let dragging = false;
     let moved = 0;
     let lastX = 0;
@@ -350,6 +379,8 @@ export default function Globe({
       lastX = e.clientX;
       lastY = e.clientY;
       moved += Math.abs(dx) + Math.abs(dy);
+      targetRotY = null;
+      targetRotX = null;
       rotY += dx * 0.005;
       rotX = Math.max(-1.4, Math.min(1.4, rotX + dy * 0.005));
       velY = dx * 0.0004;
@@ -367,7 +398,7 @@ export default function Globe({
       if (!hit) return;
       const local = root.worldToLocal(hit.point.clone()).normalize();
       const lat = (Math.asin(local.y) * 180) / Math.PI;
-      const lon = (Math.atan2(local.z, local.x) * 180) / Math.PI;
+      const lon = (-Math.atan2(local.z, local.x) * 180) / Math.PI;
       pickRef.current(Math.round(lat * 100) / 100, Math.round(lon * 100) / 100);
     }
     function onWheel(e: WheelEvent) {
@@ -408,7 +439,15 @@ export default function Globe({
       const dt = Math.min(clock.getDelta(), 0.05);
       frame++;
 
-      if (!dragging) {
+      if (targetRotY != null && targetRotX != null) {
+        rotY += (targetRotY - rotY) * 0.08;
+        rotX += (targetRotX - rotX) * 0.08;
+        if (Math.abs(targetRotY - rotY) < 0.002) {
+          targetRotY = null;
+          targetRotX = null;
+        }
+        velY = 0;
+      } else if (!dragging) {
         rotY += velY;
         velY *= 0.96;
         if (Math.abs(velY) < 0.0006) velY = 0.0006;
@@ -502,6 +541,11 @@ export default function Globe({
   useEffect(() => {
     if (launching) apiRef.current?.startLaunch();
   }, [launching]);
+
+  useEffect(() => {
+    if (focusKey && site) apiRef.current?.focus(site.latitude, site.longitude);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusKey]);
 
   return (
     <div className="relative h-[clamp(320px,52vh,560px)] w-full overflow-hidden rounded-lg border border-border bg-[#04070f]">

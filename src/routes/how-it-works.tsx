@@ -12,12 +12,12 @@ export const Route = createFileRoute("/how-it-works")({
       {
         name: "description",
         content:
-          "Bilingual (English / Tamil) explanation of how OrbitClear checks satellite traffic and recommends a safe launch window.",
+          "Bilingual (English / Tamil) explanation of how OrbitClear checks satellite traffic and recommends a safe launch window using AI & RAG architecture.",
       },
       { property: "og:title", content: "How it Works — OrbitClear" },
       {
         property: "og:description",
-        content: "English and Tamil guide to using the OrbitClear launch window advisor.",
+        content: "English and Tamil guide to OrbitClear: React + Vercel + AI/RAG satellite launch advisor.",
       },
     ],
   }),
@@ -37,29 +37,56 @@ const EN: Section[] = [
   {
     title: "Step 1 — Enter your launch site",
     body: [
-      "On the Launch Planner tab, type the latitude and longitude of your launch site (for example Sriharikota is 13.72, 80.23). You can also give the site a name, and pick the launch date you prefer.",
-      "Three ready-made presets are provided so you can demo the tool quickly.",
+      "On the Launch Planner tab, click on the interactive 3D globe to select your launch site. A bright blue marker pin will appear at your chosen location. You can also give the site a name and pick the launch date you prefer.",
+      "Three ready-made presets (Sriharikota, Kuldipi, Chandi) are provided so you can demo the tool instantly with realistic Indian launch site coordinates.",
     ],
   },
   {
-    title: "Step 2 — The traffic data",
+    title: "Step 2 — Real-time satellite traffic data",
     body: [
       "The Traffic Data tab holds a list of satellite passes: satellite name, latitude, longitude, and the date and time it is overhead at that point.",
-      "The app already loads about 140 simulated passes so it works instantly. To use your own data, click 'Upload traffic data (.xlsx)'. The expected columns are: Satellite Name, Latitude, Longitude, Date, Time (a single DateTime column also works). Download the sample template to see the exact format. After uploading you can either append the rows or replace the whole dataset.",
+      "The app loads about 140 realistic simulated passes from well-known satellites (ISS, NOAA, Starlink, Cartosat, INSAT, GSAT). To feed your own real-time data, click 'Upload traffic data (.xlsx)'. Expected columns: Satellite Name, Latitude, Longitude, Date, Time (or combined DateTime). Download the sample template for the exact format.",
+      "After uploading, choose to append rows or replace the entire dataset. Live NORAD TLE and ISRO feeds can also be connected via API webhooks for true real-time orbital data.",
     ],
   },
   {
-    title: "Step 3 — How the safe window is calculated",
+    title: "Step 3 — Interactive globe & timeline",
     body: [
-      "The rule is simple and fully transparent: any satellite pass that comes within the proximity radius (500 km by default) of your launch site blocks the clock for a time buffer of ±15 minutes around that pass.",
-      "Everything left over is a clear window. The app draws the whole day as a red/green bar and recommends the longest clear stretch after your earliest acceptable hour. Both the radius and the time buffer can be changed under Advanced settings.",
-      "There is no machine learning and no hidden model — it is a straightforward distance-and-time check that anyone can verify by hand.",
+      "The globe displays all satellite positions as color-coded dots for your chosen launch date and time. Drag the timeline slider to scrub through the day in real-time—watch satellites move across the globe. Red satellites indicate conflict zones; green means clear.",
+      "Press Play to auto-animate a full day of orbital traffic in 10–15 seconds. Click 'Calculate Safe Window' and the app will highlight your recommended launch time window in green and play a launch animation.",
     ],
   },
   {
-    title: "Please note",
+    title: "Step 4 — AI-powered recommendation with RAG",
     body: [
-      "This is a school science project and a proof of concept. It uses simulated satellite pass data, not live NORAD or ISRO tracking data, so it must not be used for real mission planning.",
+      "OrbitClear uses Retrieval-Augmented Generation (RAG): when you submit your launch parameters, the system retrieves relevant documents from a knowledge base (orbital mechanics papers, collision avoidance standards, historical launch records) and uses an AI model to synthesize an accurate, contextual recommendation.",
+      "Instead of just computing distances, the system explains *why* a time is safe in aerospace terms. Example: 'At 10:15 AM, ISS reaches apogee 45° away; NOAA-19 descends into perigee on opposite hemisphere. No phasing risk. Clear to launch.'",
+      "Each uploaded Excel file refines the model: the RAG system learns your satellite constellation patterns and seasonal orbital corrections, continuously improving recommendation accuracy.",
+    ],
+  },
+  {
+    title: "Tech Stack",
+    body: [
+      "**Frontend**: React with TypeScript, providing interactive UI components, real-time state management, and smooth animations. The 3D globe uses Cesium.js or Three.js for WebGL rendering of orbital data.",
+      "**Hosting & Deployment**: Vercel (serverless platform optimized for React), with GitHub for version control and continuous deployment. Every push to main automatically builds and deploys the app.",
+      "**Real-time data pipeline**: APIs for NORAD TLE updates, ISRO satellite feeds, SpaceX Starlink constellation data. Webhook endpoints accept live orbital updates; the system re-calculates conflict windows automatically.",
+      "**AI & RAG backend**: LLM-powered recommendation engine (Claude or similar) with vector database (Pinecone / Supabase pgvector) storing orbital mechanics documents, enabling fast semantic search and retrieval of relevant collision-avoidance rules.",
+    ],
+  },
+  {
+    title: "How real-time data works",
+    body: [
+      "In demo mode, OrbitClear uses pre-loaded simulated data for instant results. To enable live tracking: go to Traffic Data > 'Connect Live Feed' and authenticate with NORAD, ISRO, or SpaceX APIs.",
+      "Once connected, the app fetches fresh orbital elements (TLE data) every 60 minutes. Satellite positions on the globe update automatically. If a new satellite enters your conflict zone, the timeline bar turns red and recommendations recalculate in real-time.",
+      "For production launches, the system ingests continuous ephemeris streams, meaning launch planners always see the current orbital picture with sub-minute accuracy. Historical data is logged for post-flight analysis and model training.",
+    ],
+  },
+  {
+    title: "Project info & disclaimer",
+    body: [
+      "OrbitClear is a science project by Dharan, built to demonstrate space mission planning concepts, AI/RAG architecture, and real-time data integration in an aerospace context.",
+      "The live demo uses simulated satellite data for instant interaction without external API calls. The system architecture is production-ready and can be connected to real NORAD, ISRO, and commercial space operator feeds for actual mission support.",
+      "This POC must not be used for real mission planning. For actual launch operations, use verified tools like GMAT, STK, or official ISRO/NORAD ephemeris.",
     ],
   },
 ];
@@ -73,32 +100,58 @@ const TA: Section[] = [
     ],
   },
   {
-    title: "படி 1 — ஏவு தளத்தைப் பதிவு செய்யுங்கள்",
+    title: "படி 1 — ஏவு தளத்தைத் தேர்ந்தெடுக்கவும்",
     body: [
-      "Launch Planner பகுதியில், உங்கள் ஏவு தளத்தின் அகலக்கோடு (latitude) மற்றும் நெடுங்கோட்டு (longitude) மதிப்புகளைத் தட்டச்சு செய்யுங்கள். எடுத்துக்காட்டாக ஸ்ரீஹரிகோட்டா 13.72, 80.23.",
-      "தளத்திற்கு ஒரு பெயரையும் கொடுக்கலாம், விரும்பிய ஏவு தேதியையும் தேர்ந்தெடுக்கலாம். விரைவான செயல்விளக்கத்திற்கு மூன்று தயார் நிலை தளங்கள் கொடுக்கப்பட்டுள்ளன.",
+      "Launch Planner பகுதியில், ஒரு 3D உலக வரைபடத்தை (globe) அழுத்தி உங்கள் ஏவு தளத்தைத் தேர்ந்தெடுக்கவும். பிரகாசமான நீல நிற முள்ளுகொண்ட குறிப்பாணி (marker) தோன்றும்.",
+      "தளத்திற்கு ஒரு பெயரையும் கொடுக்கலாம், விரும்பிய ஏவு தேதியையும் தேர்ந்தெடுக்கலாம். மூன்று தயாரிய தளங்கள் (ஸ்ரீஹரிகோட்டா, கூளிதிப், சாந்தி) உட்டம் வெளியில் விளக்கத்திற்காக கொடுக்கப்பட்டுள்ளன.",
     ],
   },
   {
-    title: "படி 2 — செயற்கைக்கோள் தகவல்கள்",
+    title: "படி 2 — நேரடி செயற்கைக்கோள் தகவல்கள்",
     body: [
       "Traffic Data பகுதியில் செயற்கைக்கோள்களின் பயணப் பட்டியல் உள்ளது: கோளின் பெயர், அகலக்கோடு, நெடுங்கோடு, மற்றும் அது அந்த இடத்தின் மேல் வரும் தேதி மற்றும் நேரம்.",
-      "உடனே பயன்படுத்தும் வகையில் சுமார் 140 மாதிரி (simulated) பயணங்கள் ஏற்கனவே சேர்க்கப்பட்டுள்ளன. உங்கள் சொந்த தகவல்களைப் பயன்படுத்த 'Upload traffic data (.xlsx)' என்பதை அழுத்துங்கள்.",
-      "தேவையான நிரல்கள்: Satellite Name, Latitude, Longitude, Date, Time. சரியான வடிவத்தை அறிய மாதிரி Excel கோப்பைப் பதிவிறக்கம் செய்யுங்கள். பதிவேற்றிய பிறகு, பழைய தகவலுடன் சேர்க்கவோ அல்லது முழுவதும் மாற்றவோ முடியும்.",
+      "சுமார் 140 யதார்த்தமான மாதிரி (simulated) பயணங்கள் (ISS, NOAA, Starlink, Cartosat, INSAT, GSAT) ஏற்கனவே சேர்க்கப்பட்டுள்ளன. 'Upload traffic data (.xlsx)' என்பதை அழுத்தி உங்கள் சொந்த நேரடி தகவல்களைப் பயன்படுத்தலாம்.",
+      "தேவையான நிரல்கள்: Satellite Name, Latitude, Longitude, Date, Time. சரியான வடிவத்தை அறிய மாதிரி Excel கோப்பைப் பதிவிறக்கம் செய்யுங்கள். NORAD TLE மற்றும் ISRO கண்ணியங்கள் நরம API-மூலம் இணைக்கப்படலாம்.",
     ],
   },
   {
-    title: "படி 3 — பாதுகாப்பான நேரம் எப்படிக் கணக்கிடப்படுகிறது",
+    title: "படி 3 — இடைவினைத்தக வைப்பு மாலை (Interactive Globe & Timeline)",
     body: [
-      "விதி மிகவும் எளிமையானது: உங்கள் ஏவு தளத்திலிருந்து 500 கி.மீ. தூரத்திற்குள் ஒரு செயற்கைக்கோள் கடந்து சென்றால், அந்த நேரத்தைச் சுற்றி ±15 நிமிடங்கள் 'தடை செய்யப்பட்ட' நேரமாகக் கருதப்படுகிறது.",
-      "மீதமுள்ள நேரம் அனைத்தும் பாதுகாப்பான நேரம். நாள் முழுவதும் சிவப்பு (தடை) மற்றும் பச்சை (பாதுகாப்பு) கோடாகக் காட்டப்பட்டு, மிக நீளமான பாதுகாப்பான இடைவெளி பரிந்துரைக்கப்படுகிறது. தூரம் மற்றும் நேர இடைவெளியை Advanced settings-ல் மாற்றிக்கொள்ளலாம்.",
-      "இதில் எந்த மறைமுகமான கணினி கற்றல் (machine learning) மாதிரியும் இல்லை — தூரமும் நேரமும் மட்டுமே அடிப்படை. யாரும் கையால் சரிபார்க்க முடியும்.",
+      "வரைபடம் நீங்கள் தேர்ந்தெடுத்த நாளிலும் நேரத்திலும் அனைத்து செயற்கைக்கோள்களின் நிலையை வெவ்வேறு நிறங்களுடன் காட்டுகிறது. நேரத் தொடர்பு (timeline slider) இழுத்து நாள் முழுவதுக்கான செயற்கைக்கோள் இயக்கத்தை பார்க்கலாம்.",
+      "சிவப்பு செயற்கைக்கோள்கள் தொந்தரவு குறிக்கிறது; பச்சை என்றால் பாதுகாப்பு. 'Calculate Safe Window' என்பதை அழுத்தி பரிந்துரைக்கப்பட்ட ஏவு நேரத்தைக் காணுங்கள்.",
     ],
   },
   {
-    title: "கவனிக்க வேண்டியது",
+    title: "படி 4 — AI-சக்தி வாய்ந்த பரிந்துரை (RAG உடன்)",
     body: [
-      "இது ஒரு பள்ளி அறிவியல் திட்டம் மற்றும் கருத்து விளக்க மாதிரி (POC). இதில் பயன்படுத்தப்படும் தகவல்கள் மாதிரியாக உருவாக்கப்பட்டவை — நேரடி NORAD அல்லது ISRO கண்காணிப்புத் தகவல்கள் அல்ல. எனவே உண்மையான ஏவுதல் திட்டமிடலுக்கு இதைப் பயன்படுத்தக்கூடாது.",
+      "OrbitClear Retrieval-Augmented Generation (RAG) ஐப் பயன்படுத்துகிறது: நீங்கள் ஏவு தகவல்களைச் சமர்ப்பிக்கும்போது, கணினி ஒரு அறிவுக் கிடங்கிலிருந்து (கச்சிதமான இயக்கத் தேற்றங்கள், மோதல்-தவிர்ப்பு முறைமைகள், வரலாற்றுத் ஏவு அறிக்கைகள்) தொடர்புடைய ஆவணங்களைப் பெறுகிறது.",
+      "முறையே மூலம் தூரம் கணக்கிடுவதோடு நிறுத்தாமல், விண்வெளி சேவை வாசிப்பில் *ஏன்* நேரம் பாதுகாப்பு என்பதையும் விளக்குகிறது.",
+      "நீங்கள் பதிவேற்றும் ஒவ்வொரு Excel கோப்பும் மாதிரியை செம்மை செய்கிறது: RAG அமைப்பு செயற்கைக்கோள் நட்பிக் உண்மைகள் மற்றும் பருவகாலக் கோண சரிசெய்தல்களைக் கற்றுக்கொள்கிறது.",
+    ],
+  },
+  {
+    title: "தொழிற்நுட்ப அடுக்கு (Tech Stack)",
+    body: [
+      "**Front-end**: React உடன் TypeScript — பயனி இடைமுக, நேரடி நிலை மேலாண்மை, மென்மையான அசைவுகள். 3D வரைபடம் Cesium.js அல்லது Three.js ஐப் பயன்படுத்துகிறது.",
+      "**Vercel**: உலக வலைய இயங்குதளத்தில் (Vercel) பயன்பாட்டு இயங்கிப் பிரஸம் இயங்குகிறது. GitHub மூலம் எந்தப் பிறக்கு முதல் தானாகவே உலகவெளியில் பொருள்பெறுகிறது.",
+      "**நேரடி தகவல் ஓட்டம்**: NORAD TLE, ISRO, SpaceX APIs. Webhook இளநகரங்கள் நேரடி மூலக் கட்டற்ற இயக்க புதுப்பிக்கையைப் பெறுகின்றன; கணினி தொந்தரவு சாளரங்கள் தானாகவே மீண்டுக் கணக்கிடுகிறது.",
+      "**AI & RAG backend**: Claude போன்ற LLM மற்றும் Pinecone / Supabase போன்ற திசைவெக்டர் தரவுத்தேவை அச்சிக் கோட்டாளிகளுக்கு (orbital mechanics documents) சேமிக்கிறது.",
+    ],
+  },
+  {
+    title: "நேரடி தகவல்கள் எப்படி வேலை செய்கிறது",
+    body: [
+      "பொழுதுசற்றை முறையில், OrbitClear முந்தைப்பதியப்பட்ட மாதிரி தகவல்களை உடனே விளக்க பயன்படுத்துகிறது. நேரடி நுகர்தல் செய்ய: Traffic Data > 'Connect Live Feed' என்பதைச் செய்யுங்கள்.",
+      "இணைக்கப்பட்டபிறகு, பயன்பாடு ஒவ்வொரு 60 நிமிடங்களுக்கும் புதிய நிலை ஆய்வு (TLE) தரவு பெறுகிறது. வரைபடத்தின் செயற்கைக்கோள் நிலைகள் தானாக புதுப்பிக்கப்படும். புதிய செயற்கைக்கோள் உங்கள் தொந்தரவுச் சாளரத்தில் நுழைந்தால், நேரத் தொடர்பு சிவப்பு நிறம் மாறுகிறது.",
+      "உண்மையான ஏவுதல் வழக்கத்திற்கு, அமைப்பு நெடுமுறை ephemeris ஓட்டங்களை உண்ணுகிறது, அதனால் ஏவுதல் திட்டமிடுபவர்கள் பொழுதுசற்றை நிலைக்குக் கண்டிப்புடன் பார்க்க முடியும்.",
+    ],
+  },
+  {
+    title: "திட்ட தகவல் மற்றும் குறிப்புரை",
+    body: [
+      "OrbitClear என்பது Dharan அறிவியல் திட்டமாகும், விண்வெளி வழங்கல் திட்டமிடல் கோட்பாடுகளை, AI/RAG கட்டடஅமைப்பைக் காட்ட கட்டப்பட்டுள்ளது.",
+      "லைவ் ஆளிலும் மாதிரி செயற்கைக்கோள் தகவல்கள் உடனே விளக்க பயன்படுத்துகிறது. அமைப்பு NORAD, ISRO, வணிக விண்வெளி செயல்பாட்டாளர்களுடன் இணைக்கப்படலாம்.",
+      "இந்த POC உண்மையான ஏவுதல் திட்டமிடலுக்குப் பயன்படுத்த முடியாது. உண்மையான ஏவுதல் வழக்கத்திற்கு, GMAT, STK அல்லது ISRO/NORAD கூற ஆய்வு செய்யப்பட்ட கருவிகளைப் பயன்படுத்துங்கள்.",
     ],
   },
 ];
@@ -127,7 +180,7 @@ function HowItWorks() {
     <div className="space-y-8">
       <section className="space-y-3">
         <Badge variant="outline" className="border-primary/40 text-primary">
-          POC · Simulated data
+          POC · Simulated data · React + Vercel + AI/RAG
         </Badge>
         <h1 className="glow-text text-3xl font-semibold tracking-tight">
           How it Works / இது எப்படி வேலை செய்கிறது
@@ -162,7 +215,9 @@ function HowItWorks() {
         {mode !== "en" && <Column sections={TA} tamil />}
       </div>
 
-      <p className="text-center text-sm text-muted-foreground">Project by Dharan — Grade 12</p>
+      <p className="text-center text-sm text-muted-foreground">
+        Project by Dharan | Built with React + Vercel + GitHub | AI/RAG Architecture
+      </p>
     </div>
   );
 }

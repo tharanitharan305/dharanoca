@@ -175,7 +175,7 @@ function RootComponent() {
             </main>
 
             <footer className="border-t border-border/70 py-6 text-center text-xs text-muted-foreground">
-              OrbitClear — Satellite Launch Window Advisor · POC by Dharan
+              OrbitClear v2 — By Dharan (Grade 12)
             </footer>
           </div>
         </div>

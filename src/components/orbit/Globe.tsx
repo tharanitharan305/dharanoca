@@ -320,6 +320,13 @@ export default function Globe({
     }
 
     apiRef.current = { syncSats, syncSite, startLaunch, focus };
+    (window as unknown as Record<string, unknown>)["__orbitDebug"] = () => ({
+      siteVisible: siteGroup.visible,
+      beacon: beacon.position.toArray(),
+      ringPts: dangerRing.geometry.getAttribute("position")?.count ?? 0,
+      rot: [root.rotation.x, root.rotation.y],
+      count,
+    });
     syncSats();
     syncSite();
 

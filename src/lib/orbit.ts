@@ -29,6 +29,22 @@ const SATELLITES: { name: string; alt: number }[] = [
   { name: "TERRA", alt: 705 },
   { name: "AQUA", alt: 705 },
   { name: "ASTROSAT", alt: 650 },
+  { name: "STARLINK-2044", alt: 552 },
+  { name: "STARLINK-3399", alt: 548 },
+  { name: "STARLINK-4820", alt: 541 },
+  { name: "ONEWEB-0188", alt: 1200 },
+  { name: "ONEWEB-0322", alt: 1200 },
+  { name: "IRIDIUM-133", alt: 780 },
+  { name: "IRIDIUM-148", alt: 780 },
+  { name: "SENTINEL-1A", alt: 693 },
+  { name: "SENTINEL-3B", alt: 815 },
+  { name: "RESOURCESAT-2A", alt: 817 },
+  { name: "EOS-04", alt: 529 },
+  { name: "EOS-06", alt: 742 },
+  { name: "AQUA-TRAIL CALIPSO", alt: 705 },
+  { name: "SUOMI NPP", alt: 824 },
+  { name: "NOAA-20", alt: 825 },
+  { name: "METOP-C", alt: 817 },
 ];
 
 /** Busy ground-track hubs near well-known launch sites, so the demo shows conflicts. */
@@ -54,14 +70,14 @@ export function generateSeedData(startDate = new Date()): SatellitePass[] {
   const rows: SatellitePass[] = [];
   const base = new Date(startDate);
   base.setHours(0, 0, 0, 0);
-  const DAYS = 4;
+  const DAYS = 2;
 
   SATELLITES.forEach((sat, si) => {
     const inclinationSpread = 20 + rand() * 60;
     const nodeDrift = -55 - rand() * 40; // deg per pass (ground track drift)
     let lon = -180 + rand() * 360;
     for (let day = 0; day < DAYS; day++) {
-      const passes = rand() < 0.5 ? 2 : 3;
+      const passes = 2;
       const slot = Math.floor(1440 / passes);
       for (let p = 0; p < passes; p++) {
         const minutesOfDay = Math.min(1439, p * slot + Math.floor(rand() * slot));

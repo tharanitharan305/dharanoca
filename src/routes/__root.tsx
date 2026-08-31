@@ -170,7 +170,7 @@ function RootComponent() {
             </header>
 
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-            <main className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+            <main className="mx-auto w-full max-w-[1600px] px-4 py-8 sm:py-10 lg:px-6 2xl:px-10">
               <Outlet />
             </main>
 

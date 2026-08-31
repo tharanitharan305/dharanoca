@@ -167,13 +167,13 @@ function LaunchPlanner() {
         </p>
       </section>
 
-      <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(320px,2fr)] xl:gap-8 2xl:grid-cols-[minmax(0,7fr)_minmax(380px,4fr)]">
         {/* ---------------- globe + timeline ---------------- */}
         <div className="space-y-6">
           <div className="panel space-y-4 p-4 sm:p-5">
             <Suspense
               fallback={
-                <div className="flex h-[clamp(320px,52vh,560px)] items-center justify-center rounded-lg border border-border bg-[#04070f] text-sm text-muted-foreground">
+                <div className="flex h-[clamp(300px,54vh,720px)] items-center justify-center rounded-lg border border-border bg-[#04070f] text-sm text-muted-foreground">
                   Loading globe…
                 </div>
               }
@@ -240,7 +240,7 @@ function LaunchPlanner() {
               onTogglePlay={() => setPlaying((p) => !p)}
               dateLabel={prettyDate}
             />
-            <div className="grid grid-cols-3 gap-3 text-center">
+            <div className="grid grid-cols-1 gap-3 text-center sm:grid-cols-3">
               <Stat label="In conflict now" value={live.conflict} tone="text-blocked" />
               <Stat label="Caution (1 hr)" value={live.caution} tone="text-[#ffd24a]" />
               <Stat label="Tracked in view" value={live.visible} tone="text-primary" />
@@ -351,7 +351,7 @@ function LaunchPlanner() {
 
               <div className="space-y-2">
                 <h2 className="text-xs font-medium tracking-wide uppercase">📋 Conflict report</h2>
-                <div className="max-h-72 space-y-1.5 overflow-auto pr-1">
+                <div className="max-h-72 space-y-1.5 overflow-auto pr-1 2xl:max-h-[26rem]">
                   {conflictRows.map((c, i) => (
                     <div
                       key={i}

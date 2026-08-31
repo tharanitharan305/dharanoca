@@ -136,7 +136,7 @@ function RootComponent() {
         <div className="starfield min-h-screen font-sans text-foreground">
           <div className="orbit-grid min-h-screen">
             <header className="sticky top-0 z-30 border-b border-border/70 bg-background/80 backdrop-blur">
-              <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between lg:px-6 2xl:px-10">
                 <Link to="/" className="flex items-center gap-2.5">
                   <span className="flex size-9 items-center justify-center rounded-md border border-primary/40 bg-primary/10">
                     <Satellite className="size-4 text-primary" />
@@ -170,7 +170,7 @@ function RootComponent() {
             </header>
 
             {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-            <main className="mx-auto max-w-6xl px-4 py-8 sm:py-12">
+            <main className="mx-auto w-full max-w-[1600px] px-4 py-8 sm:py-10 lg:px-6 2xl:px-10">
               <Outlet />
             </main>
 

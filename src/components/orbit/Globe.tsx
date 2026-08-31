@@ -548,7 +548,7 @@ export default function Globe({
   }, [focusKey]);
 
   return (
-    <div className="relative h-[clamp(320px,52vh,560px)] w-full overflow-hidden rounded-lg border border-border bg-[#04070f]">
+    <div className="relative h-[clamp(300px,54vh,720px)] w-full overflow-hidden rounded-lg border border-border bg-[#04070f]">
       <div ref={mountRef} className="h-full w-full" />
       {hover && (
         <div
